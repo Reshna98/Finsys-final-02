@@ -1,0 +1,108 @@
+{% extends 'company/Fin_base.html' %}
+{% block body %}
+
+<style>
+    @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+    body {
+        background: #f2f2f2;
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .search {
+        position: relative;
+        display: inline-block;
+        margin-left: 10px; /* Adjust the margin as needed */
+    }
+
+    .searchTerm {
+        width: 100%;
+        border: 3px solid #dcdcdc;
+        
+        padding: 5px;
+        height: 40px;
+        border-radius: 5px 0 0 5px;
+        outline: none;
+        background-color: transparent;
+        
+        /* color: #9DBFAF; */
+    }
+
+    /* .searchTerm:focus {
+        color: #00B4CC;
+    } */
+
+</style>
+
+<div class="page-content">
+    <div class="card radius-15">
+        <div class="card-body">
+            <div class="card-title">
+                <center>
+                    <h2 class="mb-0 text-uppercase">Retainer Invoices</h2>
+                </center>
+                <hr>
+            </div>
+        </div>
+    </div>
+    <div class="card radius-15">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="wrap">
+                        <div class="search">
+                            <input type="text" class="searchTerm" name="search">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control btn btn-outline-info dropdown-toggle text-grey" aria-label=".form-select-lg example" style="width: 100%;" name="type">
+                        <button type="button" class="btn btn-outline-info dropdown-toggle text-grey" data-toggle="dropdown">Sort BY</button>
+                        <option value="1" selected>All</option>
+                        <option value="2">Customer Name</option>
+                        <option value="3">Invoice No</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-outline-info dropdown-toggle text-grey" data-toggle="dropdown">Filter by</button>
+                        <div class="dropdown-menu" style="background-color: black;">
+                            <a class="dropdown-item" href="" style="height: 40px; font-size: 15px; color: white; text-align: center;">All</a>
+                            <a class="dropdown-item" href="" style="height: 40px; font-size: 15px; color: white; text-align: center;">Draft</a>
+                            <a class="dropdown-item" href="" style="height: 40px; font-size: 15px; color: white; text-align: center;">Sent</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <a href="">
+                        <button id="myBtn" class="btn btn-outline-info text-grey">New Retainer Invoice</button>
+                    </a>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <table class="table table-responsive-md mt-4 table-hover">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Date</th>
+                            <th style="text-align: center;">Retainer Invoice No</th>
+                            <th style="text-align: center;">Reference Number</th>
+                            <th style="text-align: center;">Customer Name</th>
+                            <th style="text-align: center;">Status</th>
+                            <th style="text-align: center;">Amount</th>
+                            <th style="text-align: center;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Your table content goes here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript code for modal and other functionalities
+</script>
+
+{% endblock %}
