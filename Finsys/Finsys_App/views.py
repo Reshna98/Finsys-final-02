@@ -1620,3 +1620,14 @@ def Fin_RET_INV_Listout(request):
             return render(request,'company/RET_INV/Ret_Inv_Listout.html',{'allmodules':allmodules,'com':com,'data':data,' ret_inv': ret_inv})
     else:
        return redirect('/')
+def create_retainer_invoice(request):
+    if 's_id' in request.session:
+        s_id = request.session['s_id']
+        data = Fin_Login_Details.objects.get(id=s_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=s_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=s_id)
+
+        if request.method == 'POST':
+           
