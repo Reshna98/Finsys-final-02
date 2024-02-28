@@ -1620,14 +1620,174 @@ def Fin_RET_INV_Listout(request):
             return render(request,'company/RET_INV/Ret_Inv_Listout.html',{'allmodules':allmodules,'com':com,'data':data,' ret_inv': ret_inv})
     else:
        return redirect('/')
-def create_retainer_invoice(request):
+
+def Fin_RET_INV_Add(request):
     if 's_id' in request.session:
         s_id = request.session['s_id']
-        data = Fin_Login_Details.objects.get(id=s_id)
+        data = Fin_Login_Details.objects.get(id = s_id)
         if data.User_Type == "Company":
-            com = Fin_Company_Details.objects.get(Login_Id=s_id)
+            com = Fin_Company_Details.objects.get(Login_Id = s_id)
+            allmodules = Fin_Modules_List.objects.get(Login_Id = s_id,status = 'New')
+            cmp = com
         else:
-            com = Fin_Staff_Details.objects.get(Login_Id=s_id)
+            com = Fin_Staff_Details.objects.get(Login_Id = s_id)
+            allmodules = Fin_Modules_List.objects.get(company_id = com.company_id,status = 'New')
+            cmp = com.company_id
 
+        item = Fin_Items.objects.filter(Company = cmp, status = 'Active')
+        customer = Fin_Customers.objects.filter(Company = cmp, status = 'Active')
+        payment_terms = Fin_Company_Payment_Terms.objects.filter(Company = cmp)
+        bank = Fin_Banking.objects.filter(company = cmp)
+        # latest_so = Fin_Sales_Order.objects.filter(Company = cmp).order_by('-id').first()
+
+        # new_number = int(latest_so.reference_no) + 1 if latest_so else 1
+
+        # if Fin_Sales_Order_Reference.objects.filter(Company = cmp).exists():
+        #     deleted = Fin_Sales_Order_Reference.objects.get(Company = cmp)
+            
+            # if deleted:
+            #     while int(deleted.reference_no) >= new_number:
+            #         new_number+=1
+
+        # Finding next SO number w r t last SO number if exists.
+        # nxtSO = ""
+        # lastSO = Fin_Sales_Order.objects.filter(Company = cmp).last()
+        # if lastSO:
+        #     salesOrder_no = str(lastSO.sales_order_no)
+        #     numbers = []
+        #     stri = []
+        #     for word in salesOrder_no:
+        #         if word.isdigit():
+        #             numbers.append(word)
+        #         else:
+        #             stri.append(word)
+            
+        #     num=''
+        #     for i in numbers:
+        #         num +=i
+            
+        #     st = ''
+        #     for j in stri:
+        #         st = st+j
+
+        #     s_order_num = int(num)+1
+
+        #     if num[0] == '0':
+        #         if s_order_num <10:
+        #             nxtSO = st+'0'+ str(s_order_num)
+        #         else:
+        #             nxtSO = st+ str(s_order_num)
+        #     else:
+        #         nxtSO = st+ str(s_order_num)
+
+        context = {
+            'allmodules':allmodules, 'com':com, 'cmp':cmp, 'data':data, 'customers':cust, 'items':itms, 'pTerms':trms,
+           'banks':bnk,'units':units, 
+        }
+        return render(request,'company/RET_INV/RET_INV_add.html',context)
+    else:
+       return redirect('/')
+
+def Fin_Create_RET_INV(request):
+    if 's_id' in request.session:
+        s_id = request.session['s_id']
+        data = Fin_Login_Details.objects.get(id = s_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id = s_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id = s_id).company_id
         if request.method == 'POST':
+            customer_id = request.POST.get('customer_id')
+            select_customer = Fin_Customers.objects.get(id=customer_id)
+            customer_email = request.POST.get('customerEmail'),
+            billing_address = request.POST.get('bill_address'),
+            gst_type = request.POST.get('gst_type'),
+            gstin = request.POST.get('gstin'),
+            place_of_supply = request.POST.get('place_of_supply'),
+            ret_inv_no = request.POST.get('ret_inv_no')
+            reference_no=request.POST.get('reference_no')
+            ret_inv_date = request.POST.get('ret_inv_date')
+            payment_method=request.POST.get('payment_method')
+            upi=request.POST.get('upi_id')
+            cheque=request.POST.get('cheque_id')
+            acc_no=request.POST.get('acc_no')            
+            sub_total=request.POST.get('sub_total')
+            adjustment=request.POST.get('adjustment')
+            grand_total=request.POST.get('grand_total')
+            note=request.POST.get('note')
+            paid_amount=request.POST.get('paid_amount')
+            balance = round(float(grand_total - paid_amount), 3)
+            sent = request.POST.get('Sent')
+            draft = request.POST.get('Draft')
+            ret_inv = Fin_Retainer_Invoice(
+                Customer=select_customer,
+                Customer_email=customer_email,
+                Customer_billing_address=billing_address,
+                Customer_gst_type=gst_type,
+                Customer_gstin=gstin,
+                Customer_place_of_supply=place_of_supply,
+                Retainer_Invoice_number=ret_inv_no,
+                Reference_number=reference_no,
+                Retainer_Invoice_date=ret_inv_date,
+                Payment_Method=payment_method,
+                Cheque_number=cheque,
+                UPI_number=upi,
+                Bank_account_no=acc_no,
+                Description=note,
+                Sub_total=sub_total,
+                Adjustment=adjustment,
+                Grand_total=grand_total,
+                Paid_amount=paid_amount,
+                Balance=balance,
+                Company=com,
+            )
+
+            ret_inv.save()
+
+            if len(request.FILES) != 0:
+               ret_inv.file=request.FILES.get('file')
+            ret_inv.save()
+
+            if sent != None:
+                ret_inv.status = 'Sent'
+                ret_inv.save()
+            else:
+                ret_inv.status = 'Draft'
+                ret_inv.save()
+            ret_inv.save()
+
+            # Save Sales Order items.
+
+            itemId = request.POST.getlist("item_id[]")
+            itemName = request.POST.getlist("item_name[]")
+            hsn  = request.POST.getlist("hsn[]")
+            qty = request.POST.getlist("qty[]")
+            price = request.POST.getlist("price[]")
+            tax = request.POST.getlist("taxGST[]") if request.POST['place_of_supply'] == com.State else request.POST.getlist("taxIGST[]")
+            discount = request.POST.getlist("discount[]")
+            total = request.POST.getlist("total[]")
+
+            if len(itemId)==len(itemName)==len(hsn)==len(qty)==len(price)==len(tax)==len(discount)==len(total) and itemId and itemName and hsn and qty and price and tax and discount and total:
+                mapped = zip(itemId,itemName,hsn,qty,price,tax,discount,total)
+                mapped = list(mapped)
+                for ele in mapped:
+                    itm = Fin_Items.objects.get(id = int(ele[0]))
+                    Fin_Sales_Order_Items.objects.create(SalesOrder = SOrder, Item = itm, hsn = ele[2], quantity = int(ele[3]), price = float(ele[4]), tax = ele[5], discount = float(ele[6]), total = float(ele[7]))
+                    # itm.current_stock -= int(ele[3])
+                    # itm.save()
+            
+            # Save transaction
+                    
+            Fin_Sales_Order_History.objects.create(
+                Company = com,
+                LoginDetails = data,
+                SalesOrder = SOrder,
+                action = 'Created'
+            )
+
+            return redirect(Fin_salesOrder)
+        else:
+            return redirect(Fin_addSalesOrder)
+    else:
+       return redirect('/')
            

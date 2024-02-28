@@ -680,8 +680,6 @@ class Fin_Retainer_Invoice(models.Model):
     Customer_place_of_supply = models.CharField(max_length=100,null=True,blank=True)
     Retainer_Invoice_number= models.CharField(max_length=100,null=True,blank=True,default=None)
     Retainer_Invoice_date = models.DateTimeField(auto_now_add=True,null=True)
-    Payment_Terms=models.ForeignKey(Fin_Company_Payment_Terms, on_delete = models.SET_NULL,null=True)
-    Expiration_date= models.DateTimeField(auto_now_add=True,null=True)
     Reference_number= models.IntegerField(null=True)
     Payment_Method= models.CharField(max_length=10,null=True,blank=True)
     Cheque_number= models.CharField(max_length=100,null=True,blank=True)
@@ -690,17 +688,13 @@ class Fin_Retainer_Invoice(models.Model):
     Description= models.CharField(max_length=100,null=True,blank=True)
     Document= models.FileField(upload_to='file/retinv',blank=True) 
     Sub_total = models.FloatField(null=True,blank=True)
-    cgst = models.FloatField(null=True,blank=True)
-    sgst = models.FloatField(null=True,blank=True)
-    igst =  models.FloatField(null=True,blank=True)
-    Shipping_charge = models.FloatField(null=True,blank=True)
     Adjustment = models.FloatField(default=0,null=True,blank=True)
     Grand_total = models.FloatField(null=True,blank=True)
     Paid_amount= models.FloatField(default=0,max_length=100,null=True)
     Balance = models.FloatField(max_length=100,null=True)
     retinv_status = (
         ('Draft','Draft'),
-        ('SENT','SENT'),
+        ('Sent','Sent'),
     )
     status =models.CharField(max_length=150,choices=retinv_status,null=True,blank=True)
 
@@ -713,6 +707,7 @@ class Fin_Retainer_Invoice_Items(models.Model):
     Quantity= models.IntegerField(default=0, null=True)
     Price = models.CharField(max_length=100,null=True)
     Discription = models.CharField(max_length=100,null=True)
+    discount = models.FloatField(null=True,blank=True)
     Total= models.FloatField(max_length=100,null=True)
 
 
